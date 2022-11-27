@@ -1,5 +1,16 @@
 import { AppService } from "./app.service";
-import { Controller, Get, HttpException, Post, Req, Res, Session, UploadedFile, UseInterceptors } from "@nestjs/common";
+import {
+    Controller,
+    Delete,
+    Get,
+    HttpException,
+    Post, Put,
+    Req,
+    Res,
+    Session,
+    UploadedFile,
+    UseInterceptors
+} from "@nestjs/common";
 import { Express, Request, Response } from "express";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
@@ -19,11 +30,9 @@ export class AppController {
 
     @Post("import")
     async import(@Req() request: Request, @Res() response: Response, @Session() session: Record<string, any>) {
-        console.log(request.body.playlists);
-
         await this.appService.import(
             request.body.id,
-            request.body.token,
+            session.token,
             session.importFile,
             request.body.playlists
         );
@@ -34,11 +43,11 @@ export class AppController {
             .send({ msg: "synced data", status: 200 });
     }
 
-    @Post("export")
+    @Put("export")
     async export(@Req() request: Request, @Res() response: Response, @Session() session: Record<string, any>) {
         session.exportFile = await this.appService.export(
             request.body.id,
-            request.body.token
+            session.token
         );
 
         response
@@ -48,7 +57,7 @@ export class AppController {
     }
 
     @Get("download")
-    download(@Req() request: Request, @Res() response: Response, @Session() session: Record<string, any>) {
+    async download(@Req() request: Request, @Res() response: Response, @Session() session: Record<string, any>) {
         const filePath = session.exportFile;
 
         fs.access(filePath, fs.constants.R_OK, (err) => {
@@ -57,19 +66,14 @@ export class AppController {
             } else {
                 response.set(this.headers).download(filePath, (error) => {
                     if (error) {
-                        console.log(error);
+                        throw new Error("Download Error");
                     }
+                    setTimeout(async () => {
+                        await this.appService.deleteFile(filePath);
+                    }, 10000);
                 });
             }
         });
-
-        setTimeout(() => {
-            fs.access(filePath, fs.constants.R_OK, (err) => {
-                if (!err) {
-                    fs.unlinkSync(filePath);
-                }
-            });
-        }, 10000);
     }
 
     @Post("upload")
@@ -98,58 +102,50 @@ export class AppController {
         @Res() res: Response,
         @Session() session: Record<string, any>
     ) {
-        const importFilePath = file.filename;
-        console.log("Uploaded file: ", importFilePath);
-        session.importFile = importFilePath;
+        console.log("Uploaded file: ", file.filename);
+        session.importFile = `files\\uploads\\${file.filename}`;
         const playlistsData = await this.appService.getPlaylistsData(
-            importFilePath
+            file.filename
         );
         res.set(this.headers).status(200).send({
             msg: "File Uploaded",
             status: 201,
-            playlistsData: playlistsData
+            playlists: playlistsData
         });
     }
 
     @Post("delete")
-    removeFile(@Req() request: Request, @Res() response: Response, @Session() session: Record<string, any>) {
-        let filePath = "";
-        if (request.query.type == "export")
-            filePath = session.exportFile;
-        else if (request.query.type == "import")
-            filePath = session.importFile;
-        else {
-            console.log("No type defined");
-            return;
+    async removeFile(@Req() request: Request, @Res() response: Response, @Session() session: Record<string, any>) {
+        try {
+            await this.appService.deleteFile(session.exportFile);
+            session.exportFile = "";
+            await this.appService.deleteFile(session.importFile);
+            session.importFile = "";
+        } catch (e) {
+            throw new HttpException('Internal Error', 500);
         }
-
-        fs.unlink(filePath, (err) => {
-            if (err) {
-                console.log(err);
-                response.set(this.headers).status(401).send({ msg: err, status: 401 });
-            } else {
-                response
-                    .set(this.headers)
-                    .status(200)
-                    .send({ msg: "File Deleted", status: 200 });
-            }
-        });
-        console.log("Deleted file");
+        response
+            .status(200)
+            .send("Success")
     }
 
     @Post("token")
     async saveToken(@Req() request: Request, @Res() response: Response, @Session() session: Record<string, any>) {
-
-        if (request.query.e && await this.appService.validateToken(request.query.e as string)) {
+        if (request.body.e && await this.appService.validateToken(request.body.e as string)) {
             session.token = request.body.e;
             response
                 .status(200)
-                .send({msg: "OK", status: 200});
+                .send({ msg: "OK", status: 200 });
         } else {
             response
                 .status(500)
                 .send({ msg: "Token Error", status: 500 });
         }
-
     }
+
+    @Delete("token")
+    removeToken(@Session() session: Record<string, any>): void {
+        session.token = undefined;
+    }
+
 }

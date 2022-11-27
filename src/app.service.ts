@@ -1,7 +1,7 @@
 import { Injectable, HttpException } from "@nestjs/common";
 import * as fs from "fs";
 import fetch from "node-fetch";
-import axios from 'axios';
+import axios from "axios";
 
 
 @Injectable()
@@ -24,23 +24,20 @@ export class AppService {
         }
     }
 
-    async import(id, token, fileName, requestedPlaylists) {
+    async import(id, token, filePath, requestedPlaylists) {
         const self = this;
 
-        const fileText = await self.readFile(`files\\uploads\\${fileName}`);
+        const fileText = await self.readFile(filePath);
 
         const filePlaylists = JSON.parse(fileText);
+
 
         const errors = [];
 
         const creatorId = filePlaylists[0].creatorId;
 
         for (let i = 1; i < filePlaylists.length; i++) {
-            if (
-                !requestedPlaylists.find(
-                    (playlistId) => playlistId == filePlaylists[i].id
-                )
-            ) {
+            if (!requestedPlaylists.includes(filePlaylists[i].id)) {
                 continue;
             }
 
@@ -73,8 +70,13 @@ export class AppService {
             const data = await response.json();
 
             if (data.error) {
-                errors.push(filePlaylists[i].id);
-                continue;
+                if (data.error.message === 'Invalid access token' || data.error.status == 401) {
+                    throw new HttpException('Unauthorized', 401);
+                }
+                else {
+                    errors.push(filePlaylists[i].id);
+                    continue;
+                }
             }
 
             const playlistId = data.id;
@@ -84,8 +86,10 @@ export class AppService {
 
         if (errors.length) {
             await this.logError("Found creation errors");
-            await this.import(id, token, fileName, errors.join(","));
+            await this.import(id, token, filePath, errors);
         }
+
+
 
         return true;
     }
@@ -156,7 +160,9 @@ export class AppService {
     async export(id, token) {
         const playlists = await this.getUserPlaylists(id, token);
 
-        for (let i = 1; i < playlists.length && false; i++) {
+        playlists.unshift({ creatorId: id });
+
+        for (let i = 1; i < playlists.length; i++) {
             if (playlists[i].owner.id != id) continue;
 
             let url = playlists[i].tracks.href;
@@ -190,6 +196,9 @@ export class AppService {
         const filePath = `files\\downloads\\${fileName}`;
 
         fs.writeFile(filePath, JSON.stringify(playlists), (e) => {
+            if (e) {
+                throw new Error(e.message);
+            }
         });
 
         return filePath;
@@ -198,8 +207,6 @@ export class AppService {
     async getUserPlaylists(id, token): Promise<any[]> {
         const playlists = [];
         let url = `https://api.spotify.com/v1/me/playlists?offset=0&limit=20`;
-
-        playlists.push({ creatorId: id });
 
         while (url != null) {
             const response = await fetch(url, {
@@ -223,8 +230,8 @@ export class AppService {
         return playlists;
     }
 
-    async getPlaylistsData(filePath) {
-        const fileText = await this.readFile(filePath);
+    async getPlaylistsData(fileName: string) {
+        const fileText = await this.readFile("files/uploads/" + fileName);
         const filePlaylists = JSON.parse(fileText);
 
         const playlistsData = [];
@@ -251,8 +258,16 @@ export class AppService {
             }
         }).then(e => {
             return e.status === 200;
-        }).catch(() => {
+        }).catch((e) => {
             return false;
+        });
+    }
+
+    async deleteFile(filePath: string): Promise<void> {
+        fs.access(filePath, fs.constants.R_OK, (err) => {
+            if (!err) {
+                fs.unlinkSync(filePath);
+            }
         });
     }
 }

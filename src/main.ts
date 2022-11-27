@@ -1,29 +1,43 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { CorsOptions } from 'cors';
-import * as session from 'express-session';
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+import { NestExpressApplication } from "@nestjs/platform-express";
+import { CorsOptions } from "cors";
+import * as session from "express-session";
+import * as fs from "fs";
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  const corsConfig: CorsOptions = {
-    origin: 'http://127.0.0.1:8080',
-    credentials: false,
-    preftialightContinue: false,
-  };
+    const httpsOptions = {
+        key: fs.readFileSync('./cert/CA/key.pem', 'utf8'),
+        cert: fs.readFileSync('./cert/CA/server.crt', 'utf8'),
+    };
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+        httpsOptions
+    });
 
-  app.enableCors(corsConfig);
+    const corsConfig: CorsOptions = {
+        origin: "https://localhost:4200",
+        credentials: true,
+        preftialightContinue: false
+    };
 
-  app.use(
-    session({
-      secret: 'NEST_SESSION',
-      resave: false,
-      saveUninitialized: false,
-    }),
-  );
+    app.enableCors(corsConfig);
 
-  await app.listen(3000);
+    app.use(
+        session({
+            name: "NEST_SESSION",
+            secret: "sefkjb237",
+            resave: false,
+            saveUninitialized: false,
+            cookie: {
+                secure: true,
+                httpOnly: true,
+                sameSite: false
+            }
+        })
+    );
+
+    await app.listen(3000);
 }
 
 bootstrap();

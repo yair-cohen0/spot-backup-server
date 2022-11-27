@@ -36,3 +36,5 @@ lerna-debug.log*
 .idea/
 
 package-lock.json
+/cert
+/files
