@@ -89,7 +89,7 @@ export class AppService {
             await this.import(id, token, filePath, errors);
         }
 
-
+        await this.deleteFile(filePath);
 
         return true;
     }
