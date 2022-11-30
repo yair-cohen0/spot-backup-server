@@ -16,7 +16,7 @@ async function bootstrap() {
     });
 
     const corsConfig: CorsOptions = {
-        origin: "https://localhost:4200",
+        origin: "https://spotify-backup.vercel.app",
         credentials: true,
         preftialightContinue: false
     };
