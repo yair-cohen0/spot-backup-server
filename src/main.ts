@@ -16,7 +16,7 @@ async function bootstrap() {
     });
 
     const corsConfig: CorsOptions = {
-        origin: "https://spotify-backup.vercel.app",
+        origin: process.env.CLIENT_URL,
         credentials: true,
         preftialightContinue: false
     };
@@ -37,7 +37,7 @@ async function bootstrap() {
         })
     );
 
-    await app.listen(3000);
+    await app.listen(process.env.PORT);
 }
 
 bootstrap();
