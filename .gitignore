@@ -38,3 +38,4 @@ lerna-debug.log*
 package-lock.json
 /cert
 /files
+.env
