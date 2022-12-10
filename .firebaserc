@@ -1,8 +1,0 @@
-{
-  "projects": {
-    "default": "spotify-backup-server",
-    "sbs": "spotify-backup-server"
-  },
-  "targets": {},
-  "etags": {}
-}

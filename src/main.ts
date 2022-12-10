@@ -3,8 +3,7 @@ import { AppModule } from "./app.module";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { CorsOptions } from "cors";
 import * as session from "express-session";
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import * as fs from "fs";
 
 async function bootstrap() {
 
@@ -12,25 +11,9 @@ async function bootstrap() {
         // key: fs.readFileSync('./cert/CA/key.pem', 'utf8'),
         // cert: fs.readFileSync('./cert/CA/server.crt', 'utf8'),
     };
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyAk7Cx-V-9DC0_yY4MrFH_rjAWVhfHSgIc",
-        authDomain: "spotify-backup-server.firebaseapp.com",
-        projectId: "spotify-backup-server",
-        storageBucket: "spotify-backup-server.appspot.com",
-        messagingSenderId: "802860327592",
-        appId: "1:802860327592:web:3ac7c5b3da8e0b77e5589d",
-        measurementId: "G-NGBLVL1JMP"
-    };
-
-
-
-
-    const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
-    const firebaseApp = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(firebaseApp);
-
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+        httpsOptions
+    });
 
     const corsConfig: CorsOptions = {
         origin: process.env.CLIENT_URL,
@@ -39,7 +22,6 @@ async function bootstrap() {
     };
 
     app.enableCors(corsConfig);
-
 
     app.use(
         session({
