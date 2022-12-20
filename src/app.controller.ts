@@ -16,10 +16,11 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { extname } from "path";
 import * as fs from "fs";
+import {ConfigService} from "@nestjs/config";
 
 @Controller()
 export class AppController {
-    constructor(private readonly appService: AppService) {
+    constructor(private readonly appService: AppService, private configService: ConfigService) {
     }
 
     private headers = {
@@ -80,7 +81,7 @@ export class AppController {
     @UseInterceptors(
         FileInterceptor("file", {
             storage: diskStorage({
-                destination: "files/uploads",
+                destination: ".\\files\\uploads",
                 filename: (req, file, callback) => {
                     if (file.mimetype != "application/json") {
                         callback(new HttpException("Wrong file type", 400), null);
@@ -103,7 +104,7 @@ export class AppController {
         @Session() session: Record<string, any>
     ) {
         console.log("Uploaded file: ", file.filename);
-        session.importFile = `files\\uploads\\${file.filename}`;
+        session.importFile = `.\\files\\uploads\\${file.filename}`;
         const playlistsData = await this.appService.getPlaylistsData(
             file.filename
         );

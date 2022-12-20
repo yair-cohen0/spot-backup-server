@@ -2,11 +2,14 @@ import { Injectable, HttpException } from "@nestjs/common";
 import * as fs from "fs";
 import fetch from "node-fetch";
 import axios from "axios";
+import {ConfigService} from "@nestjs/config";
 
 
 @Injectable()
 export class AppService {
 
+    constructor(private configService: ConfigService) {
+    }
     async clearProfile(id, token) {
         const playlists = await this.getUserPlaylists(id, token);
 
@@ -193,12 +196,13 @@ export class AppService {
                 .map(() => Math.round(Math.random() * 16).toString(16))
                 .join("") + ".json";
 
-        const filePath = `files\\downloads\\${fileName}`;
+        const filePath = `.\\files\\downloads\\${fileName}`;
 
         fs.writeFile(filePath, JSON.stringify(playlists), (e) => {
             if (e) {
                 throw new Error(e.message);
             }
+            console.log("Created File Successfully: " + filePath)
         });
 
         return filePath;
@@ -231,7 +235,7 @@ export class AppService {
     }
 
     async getPlaylistsData(fileName: string) {
-        const fileText = await this.readFile("files/uploads/" + fileName);
+        const fileText = await this.readFile(`.\\files\\uploads\\${fileName}`);
         const filePlaylists = JSON.parse(fileText);
 
         const playlistsData = [];

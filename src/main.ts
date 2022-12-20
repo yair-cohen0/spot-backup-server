@@ -1,22 +1,25 @@
-import { NestFactory } from "@nestjs/core";
-import { AppModule } from "./app.module";
-import { NestExpressApplication } from "@nestjs/platform-express";
-import { CorsOptions } from "cors";
+import {NestFactory} from "@nestjs/core";
+import {AppModule} from "./app.module";
+import {NestExpressApplication} from "@nestjs/platform-express";
+import {CorsOptions} from "cors";
 import * as session from "express-session";
 import * as fs from "fs";
+import {ConfigService} from "@nestjs/config";
 
 async function bootstrap() {
 
+
     const httpsOptions = {
-        // key: fs.readFileSync('./cert/CA/key.pem', 'utf8'),
-        // cert: fs.readFileSync('./cert/CA/server.crt', 'utf8'),
+        key: fs.readFileSync(__dirname + '\\cert\\CA\\key.pem', 'utf8'),
+        cert: fs.readFileSync(__dirname + '\\cert\\CA\\server.crt', 'utf8'),
     };
     const app = await NestFactory.create<NestExpressApplication>(AppModule, {
         httpsOptions
     });
 
+    const configService = app.get(ConfigService);
     const corsConfig: CorsOptions = {
-        origin: process.env.CLIENT_URL,
+        origin: configService.get('client_url'),
         credentials: true,
         preftialightContinue: false
     };

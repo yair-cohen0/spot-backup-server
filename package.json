@@ -8,6 +8,7 @@
     "scripts": {
         "prebuild": "rimraf dist",
         "build": "nest build",
+        "build:test": "node -r dotenv/config dist/main.js",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "start": "nest start --watch",
         "start:dev": "nest start --watch",
@@ -23,6 +24,7 @@
     "dependencies": {
         "@nestjs/cli": "^9.0.0",
         "@nestjs/common": "^9.0.0",
+        "@nestjs/config": "^2.2.0",
         "@nestjs/core": "^9.0.0",
         "@nestjs/platform-express": "^9.0.0",
         "axios": "^0.27.2",
