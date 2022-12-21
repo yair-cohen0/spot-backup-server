@@ -18,6 +18,7 @@ async function bootstrap() {
     });
 
     const configService = app.get(ConfigService);
+
     const corsConfig: CorsOptions = {
         origin: configService.get('client_url'),
         credentials: true,
@@ -40,7 +41,7 @@ async function bootstrap() {
         })
     );
 
-    await app.listen(process.env.PORT || 3000);
+    await app.listen(configService.get('port') || 3000);
 }
 
 bootstrap();

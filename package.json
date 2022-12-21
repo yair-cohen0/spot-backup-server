@@ -6,7 +6,7 @@
     "private": true,
     "license": "UNLICENSED",
     "scripts": {
-        "prebuild": "rimraf dist",
+        "prebuild": "rm -rf dist",
         "build": "nest build",
         "build:test": "node -r dotenv/config dist/main.js",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
