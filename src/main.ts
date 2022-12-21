@@ -3,7 +3,6 @@ import {AppModule} from "./app.module";
 import {NestExpressApplication} from "@nestjs/platform-express";
 import {CorsOptions} from "cors";
 import * as session from "express-session";
-import * as fs from "fs";
 import {ConfigService} from "@nestjs/config";
 
 async function bootstrap() {
