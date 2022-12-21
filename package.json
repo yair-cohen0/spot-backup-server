@@ -6,7 +6,7 @@
     "private": true,
     "license": "UNLICENSED",
     "scripts": {
-        "prebuild": "./prebuild.sh",
+        "prebuild": "sh ./prebuild.sh",
         "build": "nest build",
         "build:test": "node -r dotenv/config dist/main.js",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
