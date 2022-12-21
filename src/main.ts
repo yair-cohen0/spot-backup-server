@@ -8,13 +8,12 @@ import {ConfigService} from "@nestjs/config";
 async function bootstrap() {
 
 
-    const httpsOptions = {
+    // const httpsOptions = {
         // key: fs.readFileSync(__dirname + '\\cert\\CA\\key.pem', 'utf8'),
         // cert: fs.readFileSync(__dirname + '\\cert\\CA\\server.crt', 'utf8'),
-    };
-    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-        httpsOptions
-    });
+    // };
+
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
     const configService = app.get(ConfigService);
 
