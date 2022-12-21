@@ -6,7 +6,7 @@
     "private": true,
     "license": "UNLICENSED",
     "scripts": {
-        "prebuild": "sh ./prebuild.sh",
+        "prebuild": "rm -rf dist",
         "build": "nest build",
         "build:test": "node -r dotenv/config dist/main.js",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -71,5 +71,8 @@
         ],
         "coverageDirectory": "../coverage",
         "testEnvironment": "node"
+    },
+    "engines": {
+        "node": "16.15.1"
     }
 }
