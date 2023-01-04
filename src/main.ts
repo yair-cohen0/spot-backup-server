@@ -9,14 +9,16 @@ import * as fs from "fs";
 async function bootstrap() {
 
 
-    const httpsOptions = {
-        key: fs.readFileSync('.\\cert\\cert.key', 'utf8'),
-        cert: fs.readFileSync('.\\cert\\cert.crt', 'utf8'),
-    };
+
 
     let app = undefined;
-    if (process.env.NODE_ENV === 'development')
+    if (process.env.NODE_ENV === 'development') {
+        const httpsOptions = {
+            key: fs.readFileSync('.\\cert\\cert.key', 'utf8'),
+            cert: fs.readFileSync('.\\cert\\cert.crt', 'utf8'),
+        };
         app = await NestFactory.create<NestExpressApplication>(AppModule, {httpsOptions});
+    }
     else
         app = await NestFactory.create<NestExpressApplication>(AppModule);
 

@@ -11,4 +11,3 @@ npm cache verify --force
 
 echo "-----> installing Dependencies"
 npm install
-npm install --save-dev
