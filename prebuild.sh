@@ -5,3 +5,4 @@ rm -rf dist
 
 echo "-----> installing Dependencies"
 npm install
+npm install --save-dev
