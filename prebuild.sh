@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 echo "-----> Deleting Dist Folder "
 rm -rf dist
