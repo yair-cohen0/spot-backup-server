@@ -5,7 +5,6 @@ import {CorsOptions} from "cors";
 import * as session from "express-session";
 import {ConfigService} from "@nestjs/config";
 import * as fs from "fs";
-import * as process from "process";
 
 async function bootstrap() {
 
